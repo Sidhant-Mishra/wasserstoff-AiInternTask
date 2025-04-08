@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto mt-8 px-4">
+    <h2 class="text-2xl font-bold text-primary-400 mb-4">LinkedIn Job Data</h2>
+
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+        <div class="text-gray-300">
+            <p><strong>File:</strong> {{ file.file.name }}</p>
+            <p><strong>Total Records:</strong> {{ row_count }}</p>
+        </div>
+        <a href="{% url 'allscraps' %}" class="mt-4 md:mt-0 inline-block bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium py-2 px-4 rounded-md">Back to All Scrapes</a>
+    </div>
+
+    <!-- Search Form -->
+    <div class="bg-gray-800 rounded-lg shadow p-4 mb-6">
+        <form method="get" class="flex flex-col sm:flex-row gap-2">
+            <input type="text" name="search" class="w-full sm:w-auto flex-grow px-4 py-2 rounded-md bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Search in any field..." value="{{ request.GET.search|default:'' }}">
+            <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md">Search</button>
+            {% if request.GET.search %}
+                <a href="{% url 'view_csv_data' file.id %}" class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    
+    {% if headers and page_obj %}
+        <div class="overflow-x-auto">         
+            <table class="w-full text-sm text-left text-gray-300 border border-gray-700">             
+                <thead class="bg-gray-700 text-gray-100">                 
+                    <tr>                     
+                        {% for header in headers %}                         
+                        <th class="px-4 py-2 border-b border-gray-600">{{ header|capfirst }}</th>                     
+                        {% endfor %}                 
+                    </tr>             
+                </thead>             
+                <tbody>                 
+                    {% for row in page_obj %}                 
+                    <tr class="hover:bg-gray-800">                     
+                        {% for cell in row %}                     
+                        <td class="px-4 py-2 border-b border-gray-700">{{ cell }}</td>                     
+                        {% endfor %}                 
+                    </tr>                 
+                    {% endfor %}             
+                </tbody>         
+            </table>     
+        </div>
+    <!-- Pagination -->
+    <nav class="mt-4">
+        <ul class="flex justify-center space-x-1">
+            {% if page_obj.has_previous %}
+                <li><a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-white">&laquo;&laquo;</a></li>
+                <li><a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-white">&laquo;</a></li>
+            {% else %}
+                <li><span class="px-3 py-1 rounded-md bg-gray-800 text-gray-500">&laquo;&laquo;</span></li>
+                <li><span class="px-3 py-1 rounded-md bg-gray-800 text-gray-500">&laquo;</span></li>
+            {% endif %}
+
+            {% for i in page_obj.paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li><span class="px-3 py-1 rounded-md bg-primary-600 text-white">{{ i }}</span></li>
+                {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                    <li><a href="?page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-white">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li><a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-white">&raquo;</a></li>
+                <li><a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-white">&raquo;&raquo;</a></li>
+            {% else %}
+                <li><span class="px-3 py-1 rounded-md bg-gray-800 text-gray-500">&raquo;</span></li>
+                <li><span class="px-3 py-1 rounded-md bg-gray-800 text-gray-500">&raquo;&raquo;</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <p class="text-center text-gray-400 mt-4">
+        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ row_count }} entries
+        {% if request.GET.search %}
+            (filtered from {{ total_unfiltered }} total entries)
+        {% endif %}
+    </p>
+
+    {% elif request.GET.search %}
+    <div class="bg-blue-800 text-blue-100 p-4 rounded-md text-center">
+        No matching records found for search term: <strong>{{ request.GET.search }}</strong>
+    </div>
+    {% else %}
+    <div class="bg-yellow-800 text-yellow-100 p-4 rounded-md text-center">
+        No data found in this CSV file.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

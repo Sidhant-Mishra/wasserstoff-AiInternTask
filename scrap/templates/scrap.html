@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="py-10">
+    <header>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-bold leading-tight text-white">Scrape On Google</h1>
+        </div>
+    </header>
+    <main>
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="px-4 py-8 sm:px-0">
+                <!-- Job scraping form -->
+                <div class="bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-8">
+                    <div class="px-4 py-5 sm:p-6">
+                        {% if job_count %}
+                        <div class="rounded-md bg-green-800 p-4 mb-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-green-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-green-300">
+                                        Scraping successful!
+                                    </h3>
+                                    <div class="mt-2 text-sm text-green-200">
+                                        <a href="{% url 'view_csv_data' excel_id=excel_id %}" class="font-medium underline">view the data</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if error %}
+                        <div class="rounded-md bg-red-800 p-4 mb-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-5a1 1 0 112 0v-1a1 1 0 11-2 0v1zm0-5a1 1 0 112 0v2a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-300">
+                                        Scraping failed
+                                    </h3>
+                                    <div class="mt-2 text-sm text-red-200">
+                                        <p>{{ error }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <form action="{% url 'scrapdata' %}" method="POST" class="space-y-6">
+                            {% csrf_token %}
+                            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                <div class="sm:col-span-3">
+                                    <label for="api_key" class="block text-sm font-medium text-gray-300">ScrapingDog API Key (required)</label>
+                                    <div class="mt-1">
+                                        <input type="text" class="bg-gray-700 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-600 rounded-md text-white" placeholder="Enter api key" id="api_key" name="api_key" required>
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-400">Enter API Key (required)</p>
+                                </div>
+
+                                <div class="sm:col-span-3">
+                                    <label for="search_query" class="block text-sm font-medium text-gray-300">Search Query</label>
+                                    <div class="mt-1">
+                                        <input type="text" id="search_query" class="bg-gray-700 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-600 rounded-md text-white" name="search_query" value="tech companies in India contact site:linkedin.com OR site:crunchbase.com">
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-400">Enter search query</p>
+                                </div>
+
+                                <div class="sm:col-span-2">
+                                    <label for="num_pages" class="block text-sm font-medium text-gray-300">Pages to Scrape</label>
+                                    <div class="mt-1">
+                                        <input type="number" class="bg-gray-700 shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-600 rounded-md text-white" id="num_pages" name="num_pages" value="5">
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-400">More pages = more results but slower, default 5</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    Start Scraping
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- How it works section -->
+                <div class="bg-gray-800 overflow-hidden shadow sm:rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-white">
+                            How This Works
+                        </h3>
+                        <div class="mt-5 prose prose-dark text-gray-300">
+                            <ul class="space-y-3 list-disc list-inside">
+                                <li>Enter your desired job title and location to search for</li>
+                                <li>Our scraper will search LinkedIn jobs matching your criteria</li>
+                                <li>Data is saved as a CSV file for your future reference</li>
+                                <li>View your results in an organized table format</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+{% endblock %}
